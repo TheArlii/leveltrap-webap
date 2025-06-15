@@ -24,53 +24,63 @@
     <h1 class="text-5xl font-extrabold text-orange-500 glow">LEVEL</h1>
     <h1 class="text-5xl font-extrabold text-orange-500 glow">TRAP</h1>
 
-    <p class="text-xl mt-4 text-yellow-400">👋 Salom, <span class="font-bold">Arli!</span></p>
+    <p class="text-xl mt-4 text-yellow-400">👋 Salom, <span id="username" class="font-bold">Foydalanuvchi</span>!</p>
 
     <div class="bg-black bg-opacity-70 rounded-2xl p-4 mt-6 w-full max-w-md mx-auto">
-      <div class="text-left space-y-3">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <span>1. </span>
-            <span class="font-semibold">Anna 🔥</span>
-          </div>
-          <span class="text-yellow-400 font-bold">1.720</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <span>2. </span>
-            <span class="font-semibold">Alexander</span>
-          </div>
-          <span class="text-yellow-400 font-bold">1.580</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <span>3. </span>
-            <span class="font-semibold">Sophia</span>
-          </div>
-          <span class="text-yellow-400 font-bold">1.500</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <span>4. </span>
-            <span class="font-semibold">Michael</span>
-          </div>
-          <span class="text-yellow-400 font-bold">1.450</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-2">
-            <span>5. </span>
-            <span class="font-semibold">David</span>
-          </div>
-          <span class="text-yellow-400 font-bold">1.400</span>
-        </div>
+      <div id="leaderboard" class="text-left space-y-3">
+        <!-- Reyting ma'lumotlari shu yerga kiritiladi -->
       </div>
 
-      <p class="mt-4 text-yellow-400">Siz <span class="font-bold">120-o'rindasiz</span> | <span class="font-bold">540</span> bal</p>
+      <p class="mt-4 text-yellow-400" id="user-position">
+        <!-- Foydalanuvchining o‘rni va bali shu yerda ko‘rsatiladi -->
+      </p>
     </div>
 
-    <button class="mt-6 text-xl text-black font-bold py-3 px-8 rounded-full neon-button">
+    <button onclick="window.location.href='game.html'"
+            class="mt-6 text-xl text-black font-bold py-3 px-8 rounded-full neon-button">
       🎮 O'yinni boshlash
     </button>
   </div>
+
+  <script>
+    async function loadLeaderboard(userId) {
+      try {
+        const res = await fetch("https://your-domain.com/api/leaderboard"); // API manzilingni bu yerga yoz!
+        const data = await res.json();
+
+        const leaderboardList = data.top.map((user, index) => `
+          <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <span>${index + 1}. </span>
+              <span class="font-semibold">${user.username}</span>
+            </div>
+            <span class="text-yellow-400 font-bold">${user.points}</span>
+          </div>
+        `).join("");
+        document.getElementById("leaderboard").innerHTML = leaderboardList;
+
+        // Foydalanuvchi o‘rni va bali
+        if (data.current_user) {
+          document.getElementById("user-position").innerHTML =
+            `Siz <span class="font-bold">${data.current_user.rank}-o'rindasiz</span> | <span class="font-bold">${data.current_user.points}</span> bal`;
+        }
+      } catch (error) {
+        console.error("Xatolik: ", error);
+      }
+    }
+
+    window.onload = () => {
+      const tg = window.Telegram.WebApp;
+      const user = tg?.initDataUnsafe?.user;
+
+      // Ism ko‘rsatish
+      if (user) {
+        document.getElementById("username").innerText = user.username || user.first_name;
+        loadLeaderboard(user.id); // API chaqiruvi
+      } else {
+        document.getElementById("username").innerText = "Mehmon";
+      }
+    };
+  </script>
 </body>
 </html>
